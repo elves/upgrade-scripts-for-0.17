@@ -104,7 +104,7 @@ func (cp *compiler) visitLambda(n *parse.Primary) {
 		}
 	}
 
-	local, _ := cp.pushScope()
+	local := cp.pushScope()
 	for _, argName := range argNames {
 		local.add(argName)
 	}

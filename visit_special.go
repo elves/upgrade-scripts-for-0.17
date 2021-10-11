@@ -105,7 +105,7 @@ func visitDel(cp *compiler, fn *parse.Form) {
 		}
 		if len(indices) == 0 {
 			if ref.scope == localScope && len(ref.subNames) == 0 {
-				cp.thisScope().deleted[ref.index] = true
+				cp.thisScope().del(qname)
 			}
 		}
 	}

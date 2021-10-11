@@ -16,21 +16,18 @@ const (
 // file.
 type compiler struct {
 	// Builtin namespace.
-	builtin *staticNs
+	builtin staticNs
 	// Lexical namespaces.
-	scopes []*staticNs
-	// Sources of captured variables.
-	captures []*staticUpNs
+	scopes []staticNs
 	// Information about the source.
 	srcMeta parse.Source
 
 	replacement map[diag.Ranging]string
 }
 
-func compile(b, g *staticNs, tree parse.Tree) (err error) {
-	g = g.clone()
+func compile(b staticNs, tree parse.Tree) (err error) {
 	cp := &compiler{
-		b, []*staticNs{g}, []*staticUpNs{new(staticUpNs)},
+		b, []staticNs{make(staticNs)},
 		tree.Source, make(map[diag.Ranging]string)}
 	defer func() {
 		r := recover()
@@ -67,21 +64,17 @@ func GetCompilationError(e interface{}) *diag.Error {
 	return nil
 }
 
-func (cp *compiler) thisScope() *staticNs {
+func (cp *compiler) thisScope() staticNs {
 	return cp.scopes[len(cp.scopes)-1]
 }
 
-func (cp *compiler) pushScope() (*staticNs, *staticUpNs) {
-	sc := new(staticNs)
-	up := new(staticUpNs)
+func (cp *compiler) pushScope() staticNs {
+	sc := make(staticNs)
 	cp.scopes = append(cp.scopes, sc)
-	cp.captures = append(cp.captures, up)
-	return sc, up
+	return sc
 }
 
 func (cp *compiler) popScope() {
 	cp.scopes[len(cp.scopes)-1] = nil
 	cp.scopes = cp.scopes[:len(cp.scopes)-1]
-	cp.captures[len(cp.captures)-1] = nil
-	cp.captures = cp.captures[:len(cp.captures)-1]
 }

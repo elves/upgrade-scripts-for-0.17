@@ -60,12 +60,12 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 	varUse := n.Head.Value
 	sigil, qname := SplitSigil(varUse)
 
-	var ref *varRef
-	var newName string
+	var foundSet bool
 	if f&setLValue != 0 {
-		ref = resolveVarRef(cp, qname, n)
+		foundSet = resolveVarRef(cp, qname, n) != nil
 	}
-	if ref == nil {
+	var newName string
+	if !foundSet {
 		if f&newLValue == 0 {
 			cp.errorpf(n, "cannot find variable $%s", qname)
 		}
@@ -75,11 +75,11 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 		segs := SplitQNameSegs(qname)
 		if len(segs) == 1 {
 			// Unqualified name - implicit local
-			ref = &varRef{localScope, cp.thisScope().add(segs[0]), nil}
+			cp.thisScope().add(segs[0])
 			newName = segs[0]
 		} else if len(segs) == 2 && (segs[0] == "local:" || segs[0] == ":") {
 			// Qualified local name
-			ref = &varRef{localScope, cp.thisScope().add(segs[1]), nil}
+			cp.thisScope().add(segs[1])
 			newName = segs[1]
 		} else {
 			cp.errorpf(n, "cannot create variable $%s; new variables can only be created in the local scope", qname)

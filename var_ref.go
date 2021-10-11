@@ -25,7 +25,6 @@ import (
 // qualified name.
 type varRef struct {
 	scope    varScope
-	index    int
 	subNames []string
 }
 
@@ -42,9 +41,9 @@ const (
 // An interface satisfied by both *compiler and *Frame. Used to implement
 // resolveVarRef as a function that works for both types.
 type scopeSearcher interface {
-	searchLocal(k string) int
-	searchCapture(k string) int
-	searchBuiltin(k string, r diag.Ranger) int
+	searchLocal(k string) bool
+	searchCapture(k string) bool
+	searchBuiltin(k string) bool
 }
 
 // Resolves a qname into a varRef.
@@ -64,17 +63,16 @@ func resolveVarRef(s scopeSearcher, qname string, r diag.Ranger) *varRef {
 
 func resolveVarRefLocal(s scopeSearcher, qname string) *varRef {
 	first, rest := SplitQName(qname)
-	index := s.searchLocal(first)
-	if index != -1 {
-		return &varRef{scope: localScope, index: index, subNames: SplitQNameSegs(rest)}
+	if s.searchLocal(first) {
+		return &varRef{scope: localScope, subNames: SplitQNameSegs(rest)}
 	}
 	return nil
 }
 
 func resolveVarRefCapture(s scopeSearcher, qname string) *varRef {
 	first, rest := SplitQName(qname)
-	if index := s.searchCapture(first); index != -1 {
-		return &varRef{scope: captureScope, index: index, subNames: SplitQNameSegs(rest)}
+	if s.searchCapture(first) {
+		return &varRef{scope: captureScope, subNames: SplitQNameSegs(rest)}
 	}
 	return nil
 }
@@ -96,32 +94,25 @@ func resolveVarRefBuiltin(s scopeSearcher, qname string, r diag.Ranger) *varRef 
 			return &varRef{scope: envScope, subNames: []string{rest}}
 		}
 	}
-	if index := s.searchBuiltin(first, r); index != -1 {
-		return &varRef{scope: builtinScope, index: index, subNames: SplitQNameSegs(rest)}
+	if s.searchBuiltin(first) {
+		return &varRef{scope: builtinScope, subNames: SplitQNameSegs(rest)}
 	}
 	return nil
 }
 
-func (cp *compiler) searchLocal(k string) int {
-	return cp.thisScope().lookup(k)
+func (cp *compiler) searchLocal(k string) bool {
+	return cp.thisScope().has(k)
 }
 
-func (cp *compiler) searchCapture(k string) int {
+func (cp *compiler) searchCapture(k string) bool {
 	for i := len(cp.scopes) - 2; i >= 0; i-- {
-		index := cp.scopes[i].lookup(k)
-		if index != -1 {
-			// Record the capture from i+1 to len(cp.scopes)-1, and reuse the
-			// index to keep the index into the previous scope.
-			index = cp.captures[i+1].add(k, true, index)
-			for j := i + 2; j < len(cp.scopes); j++ {
-				index = cp.captures[j].add(k, false, index)
-			}
-			return index
+		if cp.scopes[i].has(k) {
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
-func (cp *compiler) searchBuiltin(k string, r diag.Ranger) int {
-	return cp.builtin.lookup(k)
+func (cp *compiler) searchBuiltin(k string) bool {
+	return cp.builtin.has(k)
 }
