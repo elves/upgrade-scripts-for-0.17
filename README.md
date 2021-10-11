@@ -1,6 +1,6 @@
 # Elvish script upgrader for 0.17
 
-## Scope
+## What this does
 
 This program rewrites legacy assignment forms to equivalent `var` or `set`
 forms:
@@ -27,3 +27,11 @@ a b = lorem ipsum
 var a = foo
 var b; set a b = lorem ipsum
 ```
+
+## What this doesn't do
+
+This program does not handle any other changes introduced in 0.17.
+
+## How to use
+
+**This program is still in development. Don't use it yet.**
