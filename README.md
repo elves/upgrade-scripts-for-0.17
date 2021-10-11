@@ -20,7 +20,7 @@ If the assignment form contains multiple variables, and some of them already
 exist while others don't, it rewrites it to a `var` form that declares the
 non-existing variables and a `set` form:
 
-```
+```sh
 a = foo
 a b = lorem ipsum
 # becomes
