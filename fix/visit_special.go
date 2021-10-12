@@ -69,7 +69,23 @@ func visitSet(cp *compiler, fn *parse.Form) {
 	if eqIndex == -1 {
 		cp.errorpf(diag.PointRanging(fn.Range().To), "need = and right-hand-side")
 	}
-	cp.parseCompoundLValues(fn.Args[:eqIndex], setLValue)
+	// 0.16 has a buggy version of "set" that has the semantics of legacy
+	// assignment, i.e. it can also create new variable. Pre-declare new
+	// variables with "var", if any.
+	lvGroup := cp.parseCompoundLValues(fn.Args[:eqIndex], setLValue|newLValue)
+	hasNew := false
+	var declBuilder strings.Builder
+	declBuilder.WriteString("var")
+	for _, lv := range lvGroup.lvalues {
+		if lv.newName != "" {
+			declBuilder.WriteString(" " + lv.newName)
+			hasNew = true
+		}
+	}
+	if hasNew {
+		cp.insert(fn.Head.From, declBuilder.String()+"; ")
+	}
+
 	for _, a := range fn.Args[eqIndex+1:] {
 		cp.visit(a)
 	}

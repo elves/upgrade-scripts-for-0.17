@@ -57,13 +57,14 @@ func (cp *compiler) visitForm(n *parse.Form) {
 					newNames++
 				}
 			}
+			at := n.Head.From
 			switch newNames {
 			case 0:
 				// No new names: rewrite to set
-				cp.insert(n.From, "set ")
+				cp.insert(at, "set ")
 			case len(lvGroup.lvalues):
 				// All new names: rewrite to var
-				cp.insert(n.From, "var ")
+				cp.insert(at, "var ")
 			default:
 				// Mix of existing and new names: rewrite to var + set
 				var declBuilder strings.Builder
@@ -73,7 +74,7 @@ func (cp *compiler) visitForm(n *parse.Form) {
 						declBuilder.WriteString(" " + lv.newName)
 					}
 				}
-				cp.insert(n.From, declBuilder.String()+"; set ")
+				cp.insert(at, declBuilder.String()+"; set ")
 			}
 
 			for _, a := range n.Args[i+1:] {
