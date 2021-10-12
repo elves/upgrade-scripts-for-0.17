@@ -28,8 +28,8 @@ var a = foo
 var b; set a b = lorem ipsum
 ```
 
-The version of the `set` command that appeared in 0.16.x contained a bug where
-it could also create variables. This program also rewrites such uses of `set` by
+The version of the `set` command in 0.15.x and 0.16.x contained a bug where it
+could also create variables. This program also rewrites such uses of `set` by
 declaring those variables with `var` first:
 
 ```sh
