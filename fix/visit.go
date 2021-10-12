@@ -1,6 +1,8 @@
 package fix
 
 import (
+	"strings"
+
 	"src.elv.sh/pkg/parse"
 	"src.elv.sh/pkg/parse/cmpd"
 )
@@ -48,7 +50,32 @@ func (cp *compiler) visitForm(n *parse.Form) {
 			lhsNodes := make([]*parse.Compound, i+1)
 			lhsNodes[0] = n.Head
 			copy(lhsNodes[1:], n.Args[:i])
-			cp.parseCompoundLValues(lhsNodes, setLValue|newLValue)
+			lvGroup := cp.parseCompoundLValues(lhsNodes, setLValue|newLValue)
+			newNames := 0
+			for _, lv := range lvGroup.lvalues {
+				if lv.newName != "" {
+					newNames++
+				}
+			}
+			switch newNames {
+			case 0:
+				// No new names: rewrite to set
+				cp.insert(n.From, "set ")
+			case len(lvGroup.lvalues):
+				// All new names: rewrite to var
+				cp.insert(n.From, "var ")
+			default:
+				// Mix of existing and new names: rewrite to var + set
+				var declBuilder strings.Builder
+				declBuilder.WriteString("var")
+				for _, lv := range lvGroup.lvalues {
+					if lv.newName != "" {
+						declBuilder.WriteString(" " + lv.newName)
+					}
+				}
+				cp.insert(n.From, declBuilder.String()+"; ")
+			}
+
 			for _, a := range n.Args[i+1:] {
 				cp.visit(a)
 			}
