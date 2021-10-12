@@ -57,12 +57,6 @@ func visitVar(cp *compiler, fn *parse.Form) {
 	cp.parseCompoundLValues(fn.Args[:eqIndex], newLValue)
 }
 
-// IsUnqualified returns whether name is an unqualified variable name.
-func IsUnqualified(name string) bool {
-	i := strings.IndexByte(name, ':')
-	return i == -1 || i == len(name)-1
-}
-
 // SetForm = 'set' { LHS } '=' { Compound }
 func visitSet(cp *compiler, fn *parse.Form) {
 	eqIndex := -1
@@ -104,7 +98,7 @@ func visitDel(cp *compiler, fn *parse.Form) {
 			continue
 		}
 		if len(indices) == 0 {
-			if ref.scope == localScope && len(ref.subNames) == 0 {
+			if ref.local && len(ref.subNames) == 0 {
 				cp.thisScope().del(qname)
 			}
 		}
@@ -123,7 +117,7 @@ func visitFn(cp *compiler, fn *parse.Form) {
 
 	// Define the variable before compiling the body, so that the body may refer
 	// to the function itself.
-	cp.thisScope().add(name + FnSuffix)
+	cp.thisScope().add(name + fnSuffix)
 	cp.visitLambda(bodyNode)
 }
 
@@ -147,7 +141,7 @@ func visitUse(cp *compiler, fn *parse.Form) {
 			"superfluous argument(s)")
 	}
 
-	cp.thisScope().add(name + NsSuffix)
+	cp.thisScope().add(name + nsSuffix)
 }
 
 func visitFor(cp *compiler, fn *parse.Form) {

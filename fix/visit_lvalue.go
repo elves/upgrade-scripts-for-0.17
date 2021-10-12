@@ -58,7 +58,7 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 		cp.errorpf(n.Head, "lvalue must be valid literal variable names")
 	}
 	varUse := n.Head.Value
-	sigil, qname := SplitSigil(varUse)
+	sigil, qname := splitSigil(varUse)
 
 	var foundSet bool
 	if f&setLValue != 0 {
@@ -72,7 +72,7 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 		if len(n.Indices) > 0 {
 			cp.errorpf(n, "name for new variable must not have indices")
 		}
-		segs := SplitQNameSegs(qname)
+		segs := splitQNameSegs(qname)
 		if len(segs) == 1 {
 			// Unqualified name - implicit local
 			cp.thisScope().add(segs[0])
@@ -96,6 +96,5 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 	if sigil == "@" {
 		restIndex = 0
 	}
-	// TODO: Support % (and other sigils?) if https://b.elv.sh/584 is implemented for map explosion.
 	return lvaluesGroup{[]lvalue{lv}, restIndex}
 }

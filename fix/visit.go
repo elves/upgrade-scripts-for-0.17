@@ -100,8 +100,8 @@ func (cp *compiler) visitLambda(n *parse.Primary) {
 		argNames = make([]string, len(n.Elements))
 		for i, arg := range n.Elements {
 			ref := stringLiteralOrError(cp, arg, "argument name")
-			_, qname := SplitSigil(ref)
-			name, rest := SplitQName(qname)
+			_, qname := splitSigil(ref)
+			name, rest := splitQName(qname)
 			if rest != "" {
 				cp.errorpf(arg, "argument name must be unqualified")
 			}
@@ -115,7 +115,7 @@ func (cp *compiler) visitLambda(n *parse.Primary) {
 		optNames = make([]string, len(n.MapPairs))
 		for i, opt := range n.MapPairs {
 			qname := stringLiteralOrError(cp, opt.Key, "option name")
-			name, rest := SplitQName(qname)
+			name, rest := splitQName(qname)
 			if rest != "" {
 				cp.errorpf(opt.Key, "option name must be unqualified")
 			}

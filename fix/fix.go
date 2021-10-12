@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	FnSuffix = "~"
-	NsSuffix = ":"
+	fnSuffix = "~"
+	nsSuffix = ":"
 )
 
 // compiler maintains the set of states needed when compiling a single source
