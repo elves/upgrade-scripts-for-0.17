@@ -73,7 +73,7 @@ func (cp *compiler) visitForm(n *parse.Form) {
 						declBuilder.WriteString(" " + lv.newName)
 					}
 				}
-				cp.insert(n.From, declBuilder.String()+"; ")
+				cp.insert(n.From, declBuilder.String()+"; set ")
 			}
 
 			for _, a := range n.Args[i+1:] {
