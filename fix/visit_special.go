@@ -33,7 +33,12 @@ func init() {
 	}
 }
 
-func ordinary(cp *compiler, n *parse.Form) { cp.visitForm(n) }
+func ordinary(cp *compiler, n *parse.Form) {
+	cp.visit(n.Head)
+	for _, a := range n.Args {
+		cp.visit(a)
+	}
+}
 
 // VarForm = 'var' { VariablePrimary } [ '=' { Compound } ]
 func visitVar(cp *compiler, fn *parse.Form) {
