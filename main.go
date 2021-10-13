@@ -11,7 +11,7 @@ import (
 	"src.elv.sh/pkg/parse"
 )
 
-var rewrite = flag.Bool("r", false, "rewrite files")
+var rewrite = flag.Bool("w", false, "rewrite files")
 
 func main() {
 	flag.Parse()
