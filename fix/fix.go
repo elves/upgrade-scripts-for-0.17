@@ -59,7 +59,7 @@ func applyInserts(s string, inserts []insert) string {
 }
 
 func compile(b staticNs, tree parse.Tree) (inserts []insert, err error) {
-	cp := &compiler{b, []staticNs{make(staticNs)}, tree.Source, nil}
+	cp := &compiler{b, []staticNs{makeStaticNs("edit:")}, tree.Source, nil}
 	defer func() {
 		r := recover()
 		if r == nil {
