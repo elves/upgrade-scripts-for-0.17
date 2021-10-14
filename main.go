@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) == 0 {
-		process(os.Stdin, os.Stdout)
+		process("[stdin]", os.Stdin, os.Stdout)
 	} else {
 		for _, arg := range args {
 			f, err := os.OpenFile(arg, os.O_RDWR, 0)
@@ -29,18 +29,18 @@ func main() {
 			if *rewrite {
 				w = f
 			}
-			process(f, w)
+			process(arg f, w)
 		}
 	}
 }
 
-func process(r io.Reader, w io.Writer) {
+func process(name string, r io.Reader, w io.Writer) {
 	code, err := io.ReadAll(r)
 	if err != nil {
 		diag.ShowError(os.Stderr, err)
 		return
 	}
-	fixed, err := fix.Fix(parse.Source{Name: "[stdin]", Code: string(code)})
+	fixed, err := fix.Fix(parse.Source{Name: name, Code: string(code)})
 	if err != nil {
 		diag.ShowError(os.Stderr, err)
 		return
