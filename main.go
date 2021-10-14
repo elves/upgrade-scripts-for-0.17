@@ -11,7 +11,10 @@ import (
 	"src.elv.sh/pkg/parse"
 )
 
-var rewrite = flag.Bool("w", false, "rewrite files")
+var (
+	rewrite = flag.Bool("w", false, "rewrite files")
+	lambda  = flag.Bool("lambda", false, "migrate lambda syntax")
+)
 
 func main() {
 	flag.Parse()
@@ -40,7 +43,7 @@ func process(name string, r io.Reader, w io.Writer) {
 		diag.ShowError(os.Stderr, err)
 		return
 	}
-	fixed, err := fix.Fix(parse.Source{Name: name, Code: string(code)})
+	fixed, err := fix.Fix(parse.Source{Name: name, Code: string(code)}, fix.Opts{MigrateLambda: *lambda})
 	if err != nil {
 		diag.ShowError(os.Stderr, err)
 		return

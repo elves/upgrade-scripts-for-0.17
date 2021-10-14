@@ -17,6 +17,8 @@ const (
 // compiler maintains the set of states needed when compiling a single source
 // file.
 type compiler struct {
+	opts Opts
+
 	// Builtin namespace.
 	builtin staticNs
 	// Lexical namespaces.
@@ -33,12 +35,16 @@ type insert struct {
 	text string
 }
 
-func Fix(src parse.Source) (string, error) {
+type Opts struct {
+	MigrateLambda bool
+}
+
+func Fix(src parse.Source, opts Opts) (string, error) {
 	t, err := parse.Parse(src, parse.Config{})
 	if err != nil {
 		return "", err
 	}
-	inserts, deletes, err := compile(builtinNs, t)
+	inserts, deletes, err := compile(builtinNs, t, opts)
 	if err != nil {
 		return "", err
 	}
@@ -67,8 +73,8 @@ func applyDiff(s string, inserts []insert, deletes []diag.Ranging) string {
 	return sb.String()
 }
 
-func compile(b staticNs, tree parse.Tree) (inserts []insert, deletes []diag.Ranging, err error) {
-	cp := &compiler{b, []staticNs{makeStaticNs("edit:")}, tree.Source, nil, nil}
+func compile(b staticNs, tree parse.Tree, opts Opts) (inserts []insert, deletes []diag.Ranging, err error) {
+	cp := &compiler{opts, b, []staticNs{makeStaticNs("edit:")}, tree.Source, nil, nil}
 	defer func() {
 		r := recover()
 		if r == nil {

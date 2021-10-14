@@ -101,7 +101,7 @@ func (cp *compiler) visitForm(n *parse.Form) {
 }
 
 func (cp *compiler) visitLambda(n *parse.Primary) {
-	if n.LegacyLambda {
+	if cp.opts.MigrateLambda && n.LegacyLambda {
 		lbracket, rbracket := -1, -1
 	ch:
 		for _, ch := range parse.Children(n) {
