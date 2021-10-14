@@ -15,11 +15,6 @@ var fixTests = []struct {
 		"var a = foo",
 	},
 	{
-		"new explicit local variable",
-		"local:a = foo",
-		"var local:a = foo",
-	},
-	{
 		"new variable in lambda",
 		"{ a = foo }",
 		"{ var a = foo }",
@@ -128,6 +123,16 @@ var fixTests = []struct {
 		"buggy set, mix of existing and new variables",
 		"var a; set a b = foo bar",
 		"var a; var b; set a b = foo bar",
+	},
+	{
+		"strip local: from variable to declare",
+		"local:a = foo",
+		"var a = foo",
+	},
+	{
+		"strip local: from variable to declare",
+		"var a; a local:b = foo bar",
+		"var a; var b; set a local:b = foo bar",
 	},
 }
 

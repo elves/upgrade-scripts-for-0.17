@@ -16,6 +16,7 @@ type lvaluesGroup struct {
 // Parsed lvalue.
 type lvalue struct {
 	diag.Ranging
+	source  string
 	newName string
 }
 
@@ -91,7 +92,7 @@ func (cp *compiler) parseIndexingLValue(n *parse.Indexing, f lvalueFlag) lvalues
 	for i, idx := range n.Indices {
 		ends[i+1] = idx.Range().To
 	}
-	lv := lvalue{n.Range(), newName}
+	lv := lvalue{n.Range(), parse.SourceText(n), newName}
 	restIndex := -1
 	if sigil == "@" {
 		restIndex = 0

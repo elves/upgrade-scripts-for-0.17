@@ -25,6 +25,7 @@ type compiler struct {
 	srcMeta parse.Source
 
 	inserts []insert
+	deletes []diag.Ranging
 }
 
 type insert struct {
@@ -37,29 +38,37 @@ func Fix(src parse.Source) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	inserts, err := compile(builtinNs, t)
+	inserts, deletes, err := compile(builtinNs, t)
 	if err != nil {
 		return "", err
 	}
 	// TODO: Apply replacement
-	return applyInserts(src.Code, inserts), nil
+	return applyDiff(src.Code, inserts, deletes), nil
 }
 
-func applyInserts(s string, inserts []insert) string {
+func applyDiff(s string, inserts []insert, deletes []diag.Ranging) string {
 	var sb strings.Builder
-	insert := 0
+	insertIdx := 0
+	deleteIdx := 0
 	for i, r := range s {
-		for insert < len(inserts) && i == inserts[insert].pos {
-			sb.WriteString(inserts[insert].text)
-			insert++
+		for insertIdx < len(inserts) && i == inserts[insertIdx].pos {
+			sb.WriteString(inserts[insertIdx].text)
+			insertIdx++
+		}
+		if deleteIdx < len(deletes) {
+			if d := deletes[deleteIdx]; d.From <= i && i < d.To {
+				continue
+			} else if i == d.To {
+				deleteIdx++
+			}
 		}
 		sb.WriteRune(r)
 	}
 	return sb.String()
 }
 
-func compile(b staticNs, tree parse.Tree) (inserts []insert, err error) {
-	cp := &compiler{b, []staticNs{makeStaticNs("edit:")}, tree.Source, nil}
+func compile(b staticNs, tree parse.Tree) (inserts []insert, deletes []diag.Ranging, err error) {
+	cp := &compiler{b, []staticNs{makeStaticNs("edit:")}, tree.Source, nil, nil}
 	defer func() {
 		r := recover()
 		if r == nil {
@@ -76,7 +85,10 @@ func compile(b staticNs, tree parse.Tree) (inserts []insert, err error) {
 	sort.Slice(cp.inserts, func(i, j int) bool {
 		return cp.inserts[i].pos < cp.inserts[j].pos
 	})
-	return cp.inserts, nil
+	sort.Slice(cp.deletes, func(i, j int) bool {
+		return cp.deletes[i].From < cp.deletes[j].From
+	})
+	return cp.inserts, cp.deletes, nil
 }
 
 const compilationErrorType = "compilation error"
@@ -100,6 +112,10 @@ func getCompilationError(e interface{}) *diag.Error {
 
 func (cp *compiler) insert(pos int, text string) {
 	cp.inserts = append(cp.inserts, insert{pos, text})
+}
+
+func (cp *compiler) delete(from, to int) {
+	cp.deletes = append(cp.deletes, diag.Ranging{From: from, To: to})
 }
 
 func (cp *compiler) thisScope() staticNs {

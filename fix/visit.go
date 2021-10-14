@@ -65,6 +65,11 @@ func (cp *compiler) visitForm(n *parse.Form) {
 			case len(lvGroup.lvalues):
 				// All new names: rewrite to var
 				cp.insert(at, "var ")
+				for _, lv := range lvGroup.lvalues {
+					if strings.HasPrefix(lv.source, "local:") {
+						cp.delete(lv.From, lv.From+len("local:"))
+					}
+				}
 			default:
 				// Mix of existing and new names: rewrite to var + set
 				var declBuilder strings.Builder
