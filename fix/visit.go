@@ -1,8 +1,10 @@
 package fix
 
 import (
+	"os"
 	"strings"
 
+	"src.elv.sh/pkg/diag"
 	"src.elv.sh/pkg/parse"
 	"src.elv.sh/pkg/parse/cmpd"
 )
@@ -99,6 +101,28 @@ func (cp *compiler) visitForm(n *parse.Form) {
 }
 
 func (cp *compiler) visitLambda(n *parse.Primary) {
+	if n.LegacyLambda {
+		lbracket, rbracket := -1, -1
+	ch:
+		for _, ch := range parse.Children(n) {
+			switch parse.SourceText(ch) {
+			case "[":
+				lbracket = ch.Range().From
+			case "]":
+				rbracket = ch.Range().From
+				break ch
+			}
+		}
+		if lbracket == -1 || rbracket == -1 {
+			diag.Complain(os.Stderr, "code bug: didn't find [ or ] in legacy lambda")
+		} else {
+			cp.delete(lbracket, lbracket+1)
+			cp.insert(lbracket, "{|")
+			cp.delete(rbracket, rbracket+2)
+			cp.insert(rbracket, "|")
+		}
+	}
+
 	// Parse signature.
 	var argNames, optNames []string
 	if len(n.Elements) > 0 {

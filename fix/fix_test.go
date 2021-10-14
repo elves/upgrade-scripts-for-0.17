@@ -70,14 +70,14 @@ var fixTests = []struct {
 		"var x; del x; var x = foo",
 	},
 	{
-		"set argument",
+		"set argument; legacy lambda",
 		"fn f [a]{ a = foo }",
-		"fn f [a]{ set a = foo }",
+		"fn f {|a| set a = foo }",
 	},
 	{
 		"set option",
 		"fn f [&a=b]{ a = foo }",
-		"fn f [&a=b]{ set a = foo }",
+		"fn f {|&a=b| set a = foo }",
 	},
 	{
 		"set for variable",

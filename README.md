@@ -2,6 +2,8 @@
 
 ## What this does
 
+### Rewriting legacy assignment forms
+
 This program rewrites legacy assignment forms to equivalent `var` or `set`
 forms:
 
@@ -38,6 +40,17 @@ set a b = lorem ipsum
 # becomes
 var a; set a = foo
 var b; set a b = lorem ipsum
+```
+
+### Rewriting legacy lambda syntax
+
+This program rewrites legacy lambda syntax to the new syntax, moving arguments
+and options within `[...]` before `{` to within `|...|` after `{`.
+
+```sh
+x = [a b &k=v]{ ... }
+# becomes
+x = {|a b &k=v| ... }
 ```
 
 ## What this doesn't do
