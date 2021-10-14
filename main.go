@@ -29,7 +29,7 @@ func main() {
 			if *rewrite {
 				w = f
 			}
-			process(arg f, w)
+			process(arg, f, w)
 		}
 	}
 }
