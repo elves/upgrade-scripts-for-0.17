@@ -67,7 +67,7 @@ If you're invoking it from Elvish, use the following to rewrite all Elvish
 scripts in the current directory recursively:
 
 ```sh
-upgrade-scripts-for-0.17 -w **.elv
+upgrade-scripts-for-0.17 -w **[type:regular].elv
 ```
 
 Remember to back up the files, or make sure that they are in version control,
