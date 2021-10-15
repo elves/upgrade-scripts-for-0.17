@@ -7,139 +7,155 @@ import (
 )
 
 var fixTests = []struct {
-	name, before, after string
+	name   string
+	before string
+	opts   Opts
+	after  string
 }{
 	{
-		"new variable",
-		"a = foo",
-		"var a = foo",
+		name:   "new variable",
+		before: "a = foo",
+		after:  "var a = foo",
 	},
 	{
-		"new variable in lambda",
-		"{ a = foo }",
-		"{ var a = foo }",
+		name:   "new variable in lambda",
+		before: "{ a = foo }",
+		after:  "{ var a = foo }",
 	},
 	{
-		"set local",
-		"var a = foo; a = bar",
-		"var a = foo; set a = bar",
+		name:   "set local",
+		before: "var a = foo; a = bar",
+		after:  "var a = foo; set a = bar",
 	},
 	{
-		"set explicit local",
-		"var a = foo; local:a = bar",
-		"var a = foo; set local:a = bar",
+		name:   "set explicit local",
+		before: "var a = foo; local:a = bar",
+		after:  "var a = foo; set local:a = bar",
 	},
 	{
-		"mix of var and set",
-		"var a = foo; a b = x y",
-		"var a = foo; var b; set a b = x y",
+		name:   "mix of var and set",
+		before: "var a = foo; a b = x y",
+		after:  "var a = foo; var b; set a b = x y",
 	},
 	{
-		"set builtin",
-		"value-out-indicator = x",
-		"set value-out-indicator = x",
+		name:   "set builtin",
+		before: "value-out-indicator = x",
+		after:  "set value-out-indicator = x",
 	},
 	{
-		"set captured",
-		"var a; { a = foo }",
-		"var a; { set a = foo }",
+		name:   "set captured",
+		before: "var a; { a = foo }",
+		after:  "var a; { set a = foo }",
 	},
 	{
-		"set explicit upvalue",
-		"var a; { up:a = foo }",
-		"var a; { set up:a = foo }",
+		name:   "set explicit upvalue",
+		before: "var a; { up:a = foo }",
+		after:  "var a; { set up:a = foo }",
 	},
 	{
-		"set env",
-		"E:a = b",
-		"set E:a = b",
+		name:   "set env",
+		before: "E:a = b",
+		after:  "set E:a = b",
 	},
 	{
-		"set variable declared by fn",
-		"fn f { }; f~ = { }",
-		"fn f { }; set f~ = { }",
+		name:   "set variable declared by fn",
+		before: "fn f { }; f~ = { }",
+		after:  "fn f { }; set f~ = { }",
 	},
 	{
-		"set variable declared by use",
-		"use ns; ns: = x",
-		"use ns; set ns: = x",
+		name:   "set variable declared by use",
+		before: "use ns; ns: = x",
+		after:  "use ns; set ns: = x",
 	},
 	{
-		"create deleted variable",
-		"var x; del x; x = foo",
-		"var x; del x; var x = foo",
+		name:   "create deleted variable",
+		before: "var x; del x; x = foo",
+		after:  "var x; del x; var x = foo",
 	},
 	{
-		"set argument; legacy lambda",
-		"fn f [a]{ a = foo }",
-		"fn f {|a| set a = foo }",
+		name:   "set argument",
+		before: "fn f [a]{ a = foo }",
+		after:  "fn f [a]{ set a = foo }",
 	},
 	{
-		"set option",
-		"fn f [&a=b]{ a = foo }",
-		"fn f {|&a=b| set a = foo }",
+		name:   "set option",
+		before: "fn f [&a=b]{ a = foo }",
+		after:  "fn f [&a=b]{ set a = foo }",
 	},
 	{
-		"set for variable",
-		"for x [] { x = foo }",
-		"for x [] { set x = foo }",
+		name:   "set for variable",
+		before: "for x [] { x = foo }",
+		after:  "for x [] { set x = foo }",
 	},
 	{
-		"set except variable",
-		"try { } except x { x = foo }",
-		"try { } except x { set x = foo }",
+		name:   "set except variable",
+		before: "try { } except x { x = foo }",
+		after:  "try { } except x { set x = foo }",
 	},
 	{
-		"set temp variable",
-		"a=b a = c",
-		"a=b set a = c",
+		name:   "set temp variable",
+		before: "a=b a = c",
+		after:  "a=b set a = c",
 	},
 	{
-		"set leftover temp variable",
-		"a=b nop; a = c",
-		"a=b nop; set a = c",
+		name:   "set leftover temp variable",
+		before: "a=b nop; a = c",
+		after:  "a=b nop; set a = c",
 	},
 	{
-		"rest variable",
-		"a @b = foo bar baz",
-		"var a @b = foo bar baz",
+		name:   "rest variable",
+		before: "a @b = foo bar baz",
+		after:  "var a @b = foo bar baz",
 	},
 	{
-		"create rest variable",
-		"var a; a @b = foo bar baz",
-		"var a; var b; set a @b = foo bar baz",
+		name:   "create rest variable",
+		before: "var a; a @b = foo bar baz",
+		after:  "var a; var b; set a @b = foo bar baz",
 	},
 	{
-		"complex lvalue group",
-		"{a,@b} = foo bar",
-		"var {a,@b} = foo bar",
+		name:   "complex lvalue group",
+		before: "{a,@b} = foo bar",
+		after:  "var {a,@b} = foo bar",
 	},
 	{
-		"buggy set",
-		"set a = foo",
-		"var a; set a = foo",
+		name:   "buggy set",
+		before: "set a = foo",
+		after:  "var a; set a = foo",
 	},
 	{
-		"buggy set, mix of existing and new variables",
-		"var a; set a b = foo bar",
-		"var a; var b; set a b = foo bar",
+		name:   "buggy set, mix of existing and new variables",
+		before: "var a; set a b = foo bar",
+		after:  "var a; var b; set a b = foo bar",
 	},
 	{
-		"strip local: from variable to declare",
-		"local:a = foo",
-		"var a = foo",
+		name:   "strip local: from variable to declare",
+		before: "local:a = foo",
+		after:  "var a = foo",
 	},
 	{
-		"strip local: from variable to declare",
-		"var a; a local:b = foo bar",
-		"var a; var b; set a local:b = foo bar",
+		name:   "strip local: from variable to declare",
+		before: "var a; a local:b = foo bar",
+		after:  "var a; var b; set a local:b = foo bar",
+	},
+
+	{
+		name:   "legacy lambda",
+		opts:   Opts{MigrateLambda: true},
+		before: "fn f [a b &k=v]{ ... }",
+		after:  "fn f {|a b &k=v| ... }",
+	},
+	{
+		name:   "legacy lambda with empty arg list",
+		opts:   Opts{MigrateLambda: true},
+		before: "fn f []{ ... }",
+		after:  "fn f {|| ... }",
 	},
 }
 
 func TestFix(t *testing.T) {
 	for _, tc := range fixTests {
 		t.Run(tc.name, func(t *testing.T) {
-			after, err := Fix(parse.Source{Name: tc.name, Code: tc.before})
+			after, err := Fix(parse.Source{Name: tc.name, Code: tc.before}, tc.opts)
 			if err != nil {
 				t.Fatal(err)
 			}

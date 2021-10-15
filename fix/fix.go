@@ -61,16 +61,19 @@ func applyDiff(s string, inserts []insert, deletes []diag.Ranging) string {
 			sb.WriteString(inserts[insertIdx].text)
 			insertIdx++
 		}
-		if deleteIdx < len(deletes) {
-			if d := deletes[deleteIdx]; d.From <= i && i < d.To {
-				continue
-			} else if i == d.To {
-				deleteIdx++
-			}
+		if deleteIdx < len(deletes) && i == deletes[deleteIdx].To {
+			deleteIdx++
+		}
+		if deleteIdx < len(deletes) && within(i, deletes[deleteIdx]) {
+			continue
 		}
 		sb.WriteRune(r)
 	}
 	return sb.String()
+}
+
+func within(i int, r diag.Ranging) bool {
+	return r.From <= i && i < r.To
 }
 
 func compile(b staticNs, tree parse.Tree, opts Opts) (inserts []insert, deletes []diag.Ranging, err error) {
