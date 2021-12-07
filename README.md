@@ -61,6 +61,29 @@ render the Elvish program unusable from lower versions.
 
 This program does not handle any other changes introduced in 0.17.
 
+## Known limitations
+
+In the legacy assignment form, the RHS may refer to the just declared variable,
+such as:
+
+```sh
+m = [&x={ put $m }]
+```
+
+This will get rewritten to the following, which doesn't work since the `var`
+form now evaluates the RHS before declaring the variable:
+
+```sh
+var m = [&x={ put $m }]
+```
+
+You will need to manually rewrite this to:
+
+```sh
+var m
+set m = [&x={ put $m }]
+```
+
 ## How to use
 
 Build this program:
