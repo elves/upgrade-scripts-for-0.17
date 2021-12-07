@@ -28,6 +28,7 @@ func (cp *compiler) visit(n parse.Node) {
 func (cp *compiler) visitForm(n *parse.Form) {
 	for _, a := range n.Assignments {
 		cp.parseIndexingLValue(a.Left, setLValue|newLValue)
+		cp.visit(a.Right)
 	}
 	for _, r := range n.Redirs {
 		cp.visit(r)

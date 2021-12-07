@@ -150,6 +150,12 @@ var fixTests = []struct {
 		before: "fn f []{ ... }",
 		after:  "fn f {|| ... }",
 	},
+	{
+		name:   "legacy lambda in temp assignment",
+		opts:   Opts{MigrateLambda: true},
+		before: "f=[a]{ ... } nop",
+		after:  "f={|a| ... } nop",
+	},
 }
 
 func TestFix(t *testing.T) {
