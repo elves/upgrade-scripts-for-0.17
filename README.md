@@ -56,9 +56,6 @@ x = {|a b &k=v| ... }
 The new lambda syntax is supported since 0.17.0. If your script still needs to
 support older versions, you can turn off lambda rewrite with `-lambda=false`.
 
-**WARNING**: Since the new syntax is only supported from 0.17.0, doing this will
-render the Elvish program unusable from lower versions.
-
 ## What this doesn't do
 
 This program does not handle any other changes introduced in 0.17.
