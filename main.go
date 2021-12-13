@@ -13,7 +13,7 @@ import (
 
 var (
 	rewrite = flag.Bool("w", false, "rewrite files")
-	lambda  = flag.Bool("lambda", false, "migrate lambda syntax")
+	lambda  = flag.Bool("lambda", true, "migrate lambda syntax")
 )
 
 func main() {

@@ -44,15 +44,17 @@ var b; set a b = lorem ipsum
 
 ### Rewriting legacy lambda syntax
 
-If the `-lambda` flag is given, This program also rewrites legacy lambda syntax
-to the new syntax, moving arguments and options within `[...]` before `{` to
-within `|...|` after `{`.
+This program also rewrites legacy lambda syntax to the new syntax, moving
+arguments and options within `[...]` before `{` to within `|...|` after `{`.
 
 ```sh
 x = [a b &k=v]{ ... }
 # becomes
 x = {|a b &k=v| ... }
 ```
+
+The new lambda syntax is supported since 0.17.0. If your script still needs to
+support older versions, you can turn off lambda rewrite with `-lambda=false`.
 
 **WARNING**: Since the new syntax is only supported from 0.17.0, doing this will
 render the Elvish program unusable from lower versions.
